@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
 
     if (!session) {
         const uuid = crypto.randomUUID();
-        const jwt = await new SignJWT({ userId: uuid, isAnonymous: true })
+        const jwt = await new SignJWT({ userId: uuid })
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
             .setExpirationTime("30d")
