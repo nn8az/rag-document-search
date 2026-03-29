@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
         const jwt = await new SignJWT({ userId: uuid })
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
-            .setExpirationTime("30d")
+            .setExpirationTime("7d")
             .sign(secret);
 
         const response = NextResponse.next();
@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
             path: "/",
             httpOnly: true,
             sameSite: "lax",
-            maxAge: 60 * 60 * 24 * 30, // 30 days   
+            maxAge: 60 * 60 * 24 * 7, // 7 days   
         });
 
         return response
