@@ -4,7 +4,6 @@ import { SignJWT } from "jose";
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function middleware(request: NextRequest) {
-    console.log("Middleware running for:", request.nextUrl.pathname);
     const session = request.cookies.get("session");
 
     if (!session) {
