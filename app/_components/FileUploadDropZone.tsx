@@ -1,9 +1,10 @@
 "use client";
 
-import { FileText, Loader2, X } from "lucide-react";
 import * as React from "react";
-import { toast } from "sonner";
+import { FileText, Loader2, X } from "lucide-react";
+import { useRootPageContext } from "./root-context";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   FileUpload,
@@ -11,29 +12,28 @@ import {
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
 
-export default FileUploadDropZone;
-
 export function FileUploadDropZone() {
+  const { onFileUpload } = useRootPageContext();
+
   const [files, setFiles] = React.useState<File[]>([]);
   const [isUploading, setIsUploading] = React.useState(false);
 
-  function onFileChange(files: File[]) {
-    setFiles(files);
-
+  async function onFileChange(files: File[]) {
     if (files.length < 0) return;
 
     setIsUploading(true);
-
+    
     const formData = new FormData();
     formData.append('file', files[0]);
-
+  
     try {
-      // await uploadFileServerAction(formData);
+      await onFileUpload(formData);
     } catch (error) {
       console.error("Upload failed", error);
-    } finally {
-      setIsUploading(false);
     }
+
+    setFiles([]);
+    setIsUploading(false);
   };
 
   const onFileReject = React.useCallback((file: File, message: string) => {
@@ -73,7 +73,7 @@ export function FileUploadDropZone() {
             <div>
               <p className="font-semibold">Drop a document here</p>
               <p className="text-sm text-muted-foreground">
-                .pdf, .docx, .txt <br/> (max 5MB and 100 pages)
+                .pdf, .txt <br/> (max 5MB and 100 pages)
               </p>
             </div>
             <FileUploadTrigger asChild>
