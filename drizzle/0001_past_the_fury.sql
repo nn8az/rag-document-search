@@ -1,0 +1,1 @@
+ALTER TABLE "files" ALTER COLUMN "checksum" SET DATA TYPE char(64);

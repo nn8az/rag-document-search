@@ -6,8 +6,9 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
-    serverComponentsExternalPackages: ["pdf-parse"],
   },
+  serverExternalPackages: ["pdf-parse"],
+  reactStrictMode: false,
 };
 
 export default nextConfig;
