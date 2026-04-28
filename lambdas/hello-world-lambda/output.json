@@ -1,0 +1,15 @@
+No current session found, using default AWS::AccountId
+Invoking app.lambda_handler (python3.14)
+Local image is up-to-date
+Using local image: public.ecr.aws/lambda/python:3.14-rapid-x86_64.
+
+Mounting C:\Users\Natt\Documents\Development\rag-document-search\lambdas\hello-world-lambda\.aws-sam\build\HelloWorldFunction as /var/task:ro,delegated, inside runtime container
+SAM_CONTAINER_ID: c4206b0623b492cf6e1f536ace21021e2285e54c929039baf6b4ce1045caf535
+START RequestId: 608f648b-a247-4a1a-8fc6-7191c2f4b147 Version: $LATEST
+====================
+The file ID is 563243
+====================
+{"timestamp": "2026-04-27T18:37:18Z", "level": "INFO", "message": "The file ID is 563243", "logger": "root", "requestId": "608f648b-a247-4a1a-8fc6-7191c2f4b147"}
+END RequestId: 608f648b-a247-4a1a-8fc6-7191c2f4b147
+REPORT RequestId: 608f648b-a247-4a1a-8fc6-7191c2f4b147	Init Duration: 0.04 ms	Duration: 84.73 ms	Billed Duration: 85 ms	Memory Size: 128 MB	Max Memory Used: 128 MB	
+{"statusCode": 200, "body": "{\"message\": \"This message is from app.py!\"}"}
