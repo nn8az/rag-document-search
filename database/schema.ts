@@ -2,6 +2,7 @@ import { pgTable, integer, uuid, text, varchar, char, pgEnum, vector, timestamp,
 import { sql } from "drizzle-orm";
 
 export const embeddingStatus = pgEnum("progress_status", ["not_started", "pending", "done", "error"]);
+export type embeddingStatus = typeof embeddingStatus.enumValues[number];
 
 export const files = pgTable("files", {
   fileId: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),

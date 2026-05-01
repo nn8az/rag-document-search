@@ -12,7 +12,7 @@ import {
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
 
-export function FileUploadDropZone() {
+export function FileUploadDropZone({ disabled }: { disabled?: boolean }) {
   const { onFileUpload } = useRootPageContext();
 
   const [files, setFiles] = React.useState<File[]>([]);
@@ -51,7 +51,7 @@ export function FileUploadDropZone() {
       value={files}
       onValueChange={onFileChange}
       onFileReject={onFileReject}
-      disabled={isUploading}
+      disabled={isUploading || disabled}
     >
       {isUploading ? (
         <FileUploadDropzone className="min-h-[320px]">

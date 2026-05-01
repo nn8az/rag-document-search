@@ -1,13 +1,13 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { createHash } from 'crypto';
 
-import { jwtVerify } from 'jose';
 import { TokenTextSplitter } from "@langchain/textsplitters";
 import { PDFParse } from "pdf-parse";
 
-import * as schema from "@/database/schema"
+import * as helpers from "@/app/_utils/helpers";
+
+import * as schema from "@/database/schema";
 import { db } from "@/database/index";
 
 // #region Server Actions
@@ -27,7 +27,7 @@ export interface UploadFileResult {
  * @returns The JSON object describing the result of the saving operation
  */
 export async function uploadFileServerAction(formData: FormData): Promise<UploadFileResult> {
-  const uuid = await getUUIDFromSession();
+  const uuid = await helpers.getUUID();
   if (!uuid) {
     revalidatePath('/');
     return { success: false };
@@ -39,8 +39,9 @@ export async function uploadFileServerAction(formData: FormData): Promise<Upload
   if (!file) {
     return { success: false, message: "No file uploaded" };
   }
-  if (file.size > 5 * 1024 * 1024) {
-    return { success: false, message: "File exceeds 5MB limit" };
+  if (file.size > helpers.fileSizeLimit) {
+    const fileSizeInMB = (helpers.fileSizeLimit / (1024 * 1024)).toFixed(2);
+    return { success: false, message: `File exceeds ${fileSizeInMB}MB limit` };
   }
   if (fileType !== 'pdf' && fileType !== 'txt') {
     return { success: false, message: "Invalid file type. Only .pdf and .txt files are allowed." };
@@ -58,8 +59,8 @@ export async function uploadFileServerAction(formData: FormData): Promise<Upload
     text = await file.text();
   }
 
-  if (text.length > 300000) {
-    return { success: false, message: "File exceeds 300,000 characters limit." };
+  if (text.length > helpers.fileCharacterLimit) {
+    return { success: false, message: `File exceeds ${helpers.fileCharacterLimit} characters limit.` };
   }
 
   const splitter = new TokenTextSplitter({
@@ -83,27 +84,6 @@ export async function uploadFileServerAction(formData: FormData): Promise<Upload
 // #endregion
 
 // #region Helper Functions
-/**
- * Retrieves the UUID of the authenticated user from the session cookie.
- * 
- * @returns The UUID of the user or null if not authenticated.
- */
-async function getUUIDFromSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  if (!token) return null;
-
-  try {
-    const { payload } = await jwtVerify(
-      token,
-      new TextEncoder().encode(process.env.JWT_SECRET)
-    );
-    return payload.userId as string;
-  } catch (err) {
-    return null;
-  }
-}
-
 /**
  * Generates a SHA-256 checksum for a file from a Web Stream
  * 
@@ -155,7 +135,7 @@ async function extractTextFromPDFWithPdfParse(file: File): Promise<string> {
  */
 async function saveUploadedFileToDatabase(chunks: string[], filename: string, fileType: string, uuid: string, checksum: string) {
   if (chunks.length === 0) {
-    throw new Error("No chunks to save.");
+    throw new Error("NO_CHUNKS_TO_SAVE");
   }
 
   await db.transaction(async (tx) => {
@@ -168,7 +148,7 @@ async function saveUploadedFileToDatabase(chunks: string[], filename: string, fi
       chunkCount: chunks.length,
     }).returning({ fileId: schema.files.fileId });
     if (!savedFile) {
-      throw new Error("File insertion failed");
+      throw new Error("FILE_INSERTION_FAILED");
     }
 
     // save chunk records
