@@ -1,7 +1,8 @@
 import React from "react";
 
+import { RootPageContextProvider } from "@/app/_components/root-context";
 import { FileUploadDropZone } from "@/app/_components/file-upload-drop-zone";
-import { RootPageContextProvider } from "./_components/root-context";
+import { FileTableDeleteButton } from "@/app/_components/file-table-delete-button";
 import {
   Table,
   TableBody,
@@ -45,15 +46,19 @@ function FileTable({ data }: { data: FileData[] }): React.JSX.Element {
             <TableHead>Filename</TableHead>
             <TableHead>Expiration Date</TableHead>
             <TableHead>Processing Status</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.map((file) => (
             <TableRow key={file.fileId}>
-              <TableCell>{file.filename}</TableCell>
+              <TableCell className="max-w-md break-words whitespace-normal">{file.filename}</TableCell>
               <TableCell>{file.timeToLive.toLocaleString()}</TableCell>
               <TableCell className={getFileStatusBackgroundColor(file.embeddingStatus)}>
                 {getFileStatusDisplayText(file.embeddingStatus)}
+              </TableCell>
+              <TableCell>
+                <FileTableDeleteButton fileId={file.fileId} />
               </TableCell>
             </TableRow>
           ))}
@@ -85,7 +90,7 @@ function getFileStatusDisplayText(status: schema.embeddingStatus): string {
  */
 function getFileStatusBackgroundColor(status: schema.embeddingStatus): string {
   const colorMap = {
-    "not_started": "bg-gray-500",
+    "not_started": "",
     "pending": "bg-yellow-500",
     "done": "bg-green-500",
     "error": "bg-red-500"
