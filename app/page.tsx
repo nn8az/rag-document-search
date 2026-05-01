@@ -1,7 +1,6 @@
 import React from "react";
 
-import { DebugServerActionButton } from "@/app/_components/DebugServerActionButton";
-import { FileUploadDropZone } from "@/app/_components/FileUploadDropZone";
+import { FileUploadDropZone } from "@/app/_components/file-upload-drop-zone";
 import { RootPageContextProvider } from "./_components/root-context";
 import {
   Table,
@@ -112,7 +111,6 @@ export default async function Home(): Promise<React.JSX.Element> {
       <main className="flex min-h-screen w-full max-w-7xl flex-col items-center justify-between py-8 px-16 bg-white dark:bg-black sm:items-start">
         <RootPageContextProvider>
           <FileUploadDropZone disabled={data.length > helpers.uploadCountLimit} />
-          <DebugServerActionButton />
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             {uuidMsg}
           </h1>
