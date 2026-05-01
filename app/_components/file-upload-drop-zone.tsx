@@ -1,10 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { FileText, Loader2, X } from "lucide-react";
 import { useRootPageContext } from "./root-context";
 
-import { toast } from "sonner";
+import { FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   FileUpload,
@@ -35,12 +34,6 @@ export function FileUploadDropZone({ disabled }: { disabled?: boolean }) {
     setFiles([]);
     setIsUploading(false);
   };
-
-  const onFileReject = React.useCallback((file: File, message: string) => {
-    toast.error(message, {
-      description: `"${file.name}" was rejected`,
-    });
-  }, []);
 
   return (
     <FileUpload
