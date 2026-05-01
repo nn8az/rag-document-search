@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRootPageContext } from "./root-context";
 
 import { FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,8 @@ import {
   FileUploadDropzone,
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
+
+import { useRootPageContext } from "./root-context";
 
 export function FileUploadDropZone({ disabled }: { disabled?: boolean }) {
   const { onFileUpload } = useRootPageContext();
@@ -34,6 +35,9 @@ export function FileUploadDropZone({ disabled }: { disabled?: boolean }) {
     setFiles([]);
     setIsUploading(false);
   };
+
+  const onFileReject = React.useCallback((file: File, message: string) => {
+  }, []);
 
   return (
     <FileUpload
