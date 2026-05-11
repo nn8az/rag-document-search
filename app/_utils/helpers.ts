@@ -1,6 +1,3 @@
-import { cookies } from "next/headers";
-import { jwtVerify } from 'jose';
-
 /**
  * The maximum number of files a user can upload.
  */
@@ -17,20 +14,18 @@ export const fileSizeLimit = 5 * 1024 * 1024;
 export const fileCharacterLimit = 300000;
 
 /**
- * Gets the UUID from the session JWT token.
- * @returns The UUID if the token is valid, otherwise undefined.
+ * Gets the user-friendly string displaying the file size limit. (e.g., "5MB")
+ * @returns The user-friendly string for the file size limit.
  */
-export async function getUUID() {
-  const cookie = await cookies();
-  const token = cookie.get("session")?.value;
-  let uuid;
+export function getFileSizeLimitString() {
+  // parseFloat() is used to remove trailing zeros after the decimal point (e.g., "5.00" -> "5")
+  return parseFloat((fileSizeLimit / (1024 * 1024)).toFixed(2)) + "MB";
+}
 
-  if (token) {
-    const { payload } = await jwtVerify(
-      token,
-      new TextEncoder().encode(process.env.JWT_SECRET)
-    );
-    uuid = payload.userId as string; // This contains your UUID: payload.userId
-  }
-  return uuid;
+/**
+ * Gets the user-friendly string displaying the file character limit. (e.g., "300,000")
+ * @returns The user-friendly string for the file character limit.
+ */
+export function getFileCharacterLimitString() {
+  return fileCharacterLimit.toLocaleString();
 }

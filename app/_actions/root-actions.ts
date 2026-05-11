@@ -5,7 +5,9 @@ import { createHash } from 'crypto';
 import { TokenTextSplitter } from "@langchain/textsplitters";
 import { PDFParse } from "pdf-parse";
 
+import * as serverHelpers from "@/app/_utils/server-helpers";
 import * as helpers from "@/app/_utils/helpers";
+import * as dbQueries from "@/app/_utils/db-queries";
 
 import * as schema from "@/database/schema";
 import { db } from "@/database/index";
@@ -15,7 +17,7 @@ export async function debugServerAction() {
   revalidatePath('/');
 }
 
-export interface UploadFileResult {
+export interface BasicServerActionResult {
   success: boolean;
   message?: string
 }
@@ -26,8 +28,8 @@ export interface UploadFileResult {
  * @param formData The form data containing the uploaded file
  * @returns The JSON object describing the result of the saving operation
  */
-export async function uploadFileServerAction(formData: FormData): Promise<UploadFileResult> {
-  const uuid = await helpers.getUUID();
+export async function uploadFileServerAction(formData: FormData): Promise<BasicServerActionResult> {
+  const uuid = await serverHelpers.getUUID();
   if (!uuid) {
     revalidatePath('/');
     return { success: false };
@@ -40,8 +42,7 @@ export async function uploadFileServerAction(formData: FormData): Promise<Upload
     return { success: false, message: "No file uploaded" };
   }
   if (file.size > helpers.fileSizeLimit) {
-    const fileSizeInMB = (helpers.fileSizeLimit / (1024 * 1024)).toFixed(2);
-    return { success: false, message: `File exceeds ${fileSizeInMB}MB limit` };
+    return { success: false, message: `File exceeds ${helpers.getFileSizeLimitString()} limit` };
   }
   if (fileType !== 'pdf' && fileType !== 'txt') {
     return { success: false, message: "Invalid file type. Only .pdf and .txt files are allowed." };
@@ -54,7 +55,7 @@ export async function uploadFileServerAction(formData: FormData): Promise<Upload
   let text = "";
 
   if (fileType === 'pdf') {
-    text = await extractTextFromPDFWithPdfParse(file);
+    text = await extractTextFromPdf(file);
   } else if (fileType === 'txt') {
     text = await file.text();
   }
@@ -73,9 +74,32 @@ export async function uploadFileServerAction(formData: FormData): Promise<Upload
   const textChunks = chunks.map(chunk => chunk.pageContent);
   
   try {
-    await saveUploadedFileToDatabase(textChunks, fileName, fileType, uuid, checksum)
+    await saveFileToDb(textChunks, fileName, fileType, uuid, checksum)
   } catch(error) {
     return { success: false, message: "Error saving file to database." };
+  }
+
+  revalidatePath('/');
+  return { success: true };
+}
+
+/**
+ * Deletes the requested file from the database.
+ * @param fileId The ID of the file to delete.
+ * @returns The JSON object describing the result of the operation
+ */
+export async function deleteFileServerAction(fileId: number): Promise<BasicServerActionResult> {
+  const uuid = await serverHelpers.getUUID();
+  if (!uuid) {
+    revalidatePath('/');
+    return { success: false };
+  }
+
+  try {
+    await dbQueries.deleteFile(fileId, uuid);
+  } catch (error) {
+    revalidatePath('/');
+    return { success: false, message: "Error deleting file from database." };
   }
 
   revalidatePath('/');
@@ -108,7 +132,7 @@ async function getFileChecksum(file: File): Promise<string> {
  * @param file The PDF file to extract text from
  * @return The extracted text from the PDF.
  */
-async function extractTextFromPDFWithPdfParse(file: File): Promise<string> {
+async function extractTextFromPdf(file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
@@ -133,7 +157,7 @@ async function extractTextFromPDFWithPdfParse(file: File): Promise<string> {
  * @param uuid The UUID of the user uploading the file
  * @param checksum The checksum of the file being uploaded
  */
-async function saveUploadedFileToDatabase(chunks: string[], filename: string, fileType: string, uuid: string, checksum: string) {
+async function saveFileToDb(chunks: string[], filename: string, fileType: string, uuid: string, checksum: string) {
   if (chunks.length === 0) {
     throw new Error("NO_CHUNKS_TO_SAVE");
   }

@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+import * as serverHelpers from "@/app/_utils/server-helpers";
 import * as helpers from "@/app/_utils/helpers";
 import * as schema from "@/database/schema"
 import * as dbQueries from "@/app/_utils/db-queries";
@@ -22,7 +23,7 @@ import * as dbQueries from "@/app/_utils/db-queries";
  * @returns A list of uploaded files for the user.
  */
 async function loadData(uuid: string) {
-  const result = await dbQueries.loadUploadedFiles(uuid);
+  const result = await dbQueries.loadFiles(uuid);
   return result;
 }
 type FileData = Awaited<ReturnType<typeof loadData>>[number];
@@ -103,7 +104,7 @@ function getFileStatusBackgroundColor(status: schema.embeddingStatus): string {
  * @returns React element of the rendered page
  */
 export default async function Home(): Promise<React.JSX.Element> {
-  const uuid = await helpers.getUUID();
+  const uuid = await serverHelpers.getUUID();
   let data: FileData[] = [];
   if (uuid) {
     data = await loadData(uuid);

@@ -12,8 +12,11 @@ import {
 
 import { useRootPageContext } from "./root-context";
 
+import * as helpers from "@/app/_utils/helpers";
+
 export function FileUploadDropZone({ disabled }: { disabled?: boolean }) {
-  const { onFileUpload } = useRootPageContext();
+  const rootPageContext = useRootPageContext();
+  const { onFileUpload } = rootPageContext.handlers;
 
   const [files, setFiles] = React.useState<File[]>([]);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -30,10 +33,10 @@ export function FileUploadDropZone({ disabled }: { disabled?: boolean }) {
       await onFileUpload(formData);
     } catch (error) {
       console.error("Upload failed", error);
+    } finally {
+      setFiles([]);
+      setIsUploading(false);
     }
-
-    setFiles([]);
-    setIsUploading(false);
   };
 
   const onFileReject = React.useCallback((file: File, message: string) => {
@@ -70,7 +73,7 @@ export function FileUploadDropZone({ disabled }: { disabled?: boolean }) {
             <div>
               <p className="font-semibold">Drop a document here</p>
               <p className="text-sm text-muted-foreground">
-                .pdf, .txt <br/> (max 5MB and 100 pages)
+                .pdf, .txt <br/> (max {helpers.getFileSizeLimitString()} and {helpers.getFileCharacterLimitString()} characters)
               </p>
             </div>
             <FileUploadTrigger asChild>
